@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公司旅遊意願調查表</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#0a6b8a;min-height:100vh}
+.survey-wrap{min-height:100vh;position:relative;overflow:hidden}
+.bg{position:fixed;inset:0;background:linear-gradient(160deg,#0a6b8a 0%,#1a9e7a 30%,#2ec4a0 55%,#b8e8d8 80%,#e8f7ef 100%);z-index:0}
+.bg::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cellipse cx='900' cy='420' rx='420' ry='260' fill='%230a8a7a' opacity='0.35'/%3E%3Cellipse cx='1100' cy='300' rx='260' ry='180' fill='%2316b899' opacity='0.2'/%3E%3Cellipse cx='150' cy='500' rx='300' ry='160' fill='%230a5a7a' opacity='0.25'/%3E%3Crect x='0' y='480' width='1200' height='120' fill='%230a4a6a' opacity='0.3'/%3E%3C/svg%3E") center/cover no-repeat}
+.page{position:relative;z-index:1;display:none;padding:2rem 1.5rem;max-width:640px;margin:0 auto}
+.page.active{display:block}
+.p1-content{display:flex;flex-direction:column;align-items:center;text-align:center;padding:3rem 1rem}
+.p1-icon{font-size:72px;margin-bottom:1rem;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.p1-title{font-size:2.2rem;font-weight:700;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.4);line-height:1.3;margin-bottom:1rem}
+.p1-sub{font-size:1.05rem;color:#d0f5ec;line-height:1.8;margin-bottom:1.5rem;max-width:480px}
+.p1-note{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:1rem 1.5rem;color:#fff;font-size:0.95rem;margin-bottom:2rem;max-width:420px}
+.btn-start{background:#ff8c42;color:#fff;border:none;border-radius:50px;padding:1rem 2.5rem;font-size:1.15rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.5rem;box-shadow:0 4px 20px rgba(255,140,66,0.5);transition:transform 0.15s}
+.btn-start:hover{transform:scale(1.05)}
+.btn-start .arrow{font-size:1.4rem;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+.page-header{background:rgba(255,255,255,0.15);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.25)}
+.page-header h2{color:#fff;font-size:1.3rem;font-weight:700}
+.page-header p{color:#d0f5ec;font-size:0.85rem;margin-top:4px}
+.form-card{background:rgba(255,255,255,0.93);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:0.9rem;font-weight:600;color:#1a5c6a;margin-bottom:0.4rem}
+.form-group input[type=text],.form-group input[type=number],.form-group textarea{width:100%;padding:0.6rem 0.8rem;border:1.5px solid #cde8e0;border-radius:8px;font-size:0.95rem;color:#2a2a2a;background:#fff;outline:none;transition:border 0.2s}
+.form-group input:focus,.form-group textarea:focus{border-color:#1a9e7a}
+.form-group.error input,.form-group.error textarea,.form-group.error .radio-group{border-color:#e24b4a!important}
+.form-group.error .err-msg{display:block}
+.err-msg{display:none;color:#e24b4a;font-size:0.8rem;margin-top:3px}
+.radio-group{display:flex;gap:0.6rem;flex-wrap:wrap;border:1.5px solid #cde8e0;border-radius:8px;padding:0.6rem;background:#fff}
+.radio-opt{display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem}
+.radio-opt input{accent-color:#1a9e7a}
+.num-row{display:flex;gap:1rem}
+.num-row .form-group{flex:1}
+.field-hint{font-size:0.78rem;color:#888;margin-top:3px}
+.category-block{margin-bottom:1.3rem}
+.category-title{font-size:0.9rem;font-weight:700;color:#1a5c6a;margin-bottom:0.5rem}
+.chips{display:flex;flex-wrap:wrap;gap:0.45rem}
+.chip{padding:0.38rem 0.8rem;border-radius:20px;border:1.5px solid #8ecfc0;background:#f0fdf8;color:#155e4e;font-size:0.82rem;cursor:pointer;transition:all 0.15s;user-select:none}
+.chip:hover{background:#c5f0e4}
+.chip.selected{background:#1a9e7a;color:#fff;border-color:#1a9e7a}
+.chip.chip-other{border-style:dashed}
+.other-input{margin-top:0.45rem;display:none;width:100%;padding:0.4rem 0.8rem;border:1.5px solid #cde8e0;border-radius:8px;font-size:0.85rem;outline:none;transition:border 0.2s}
+.other-input.show{display:block}
+.other-input.error{border-color:#e24b4a!important}
+.category-block.error .chips-wrap{outline:2px solid #e24b4a;border-radius:8px;padding:3px}
+.category-block .err-msg{display:none;color:#e24b4a;font-size:0.8rem;margin-top:4px}
+.category-block.error .err-msg{display:block}
+.open-textarea{width:100%;padding:0.6rem 0.8rem;border:1.5px solid #cde8e0;border-radius:8px;font-size:0.9rem;min-height:90px;resize:vertical;outline:none;transition:border 0.2s}
+.open-textarea:focus{border-color:#1a9e7a}
+.open-textarea.error{border-color:#e24b4a!important}
+.btn-next{background:#1a9e7a;color:#fff;border:none;border-radius:50px;padding:0.8rem 2rem;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:0.5rem;transition:background 0.15s}
+.btn-next:hover{background:#147a5e}
+.btn-submit{background:#ff8c42;color:#fff;border:none;border-radius:50px;padding:0.85rem 2rem;font-size:1.05rem;font-weight:700;cursor:pointer;width:100%;transition:background 0.15s}
+.btn-submit:hover{background:#e07030}
+.step-indicator{display:flex;gap:0.5rem;justify-content:center;margin-bottom:1.2rem}
+.step-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.35);transition:background 0.3s}
+.step-dot.active{background:#fff}
+.thankyou{display:flex;flex-direction:column;align-items:center;text-align:center;padding:3rem 1rem}
+.ty-face{font-size:6rem;animation:shake 0.6s infinite alternate}
+@keyframes shake{0%{transform:rotate(-10deg) scale(1)}100%{transform:rotate(10deg) scale(1.15)}}
+.ty-text{font-size:1.5rem;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.4);line-height:1.6;margin:1rem 0;animation:rainbow 2s infinite}
+@keyframes rainbow{0%{color:#fff}25%{color:#ffeb3b}50%{color:#ff9800}75%{color:#80deea}100%{color:#fff}}
+.ty-sub{color:#d0f5ec;font-size:1rem;line-height:1.7;margin-top:0.5rem}
+.stars{font-size:2.2rem;animation:sparkle 1s infinite alternate}
+@keyframes sparkle{0%{opacity:0.6;letter-spacing:2px}100%{opacity:1;letter-spacing:10px}}
+</style>
+</head>
+<body>
+<div class="survey-wrap">
+  <div class="bg"></div>
+
+  <!-- ===== 第一頁 ===== -->
+  <div class="page active" id="page1">
+    <div class="p1-content">
+      <div class="p1-icon">🏖️</div>
+      <div class="p1-title">出發吧！<br>今年我們要玩大的！</div>
+      <div class="p1-sub">朝九晚五的日子暫且拋在腦後，<br>陽光、海浪、椰子樹正在向我們揮手！<br>今年的公司旅遊，要讓大家玩到捨不得回家 🌴✨</div>
+      <div class="p1-note">📋 為了讓每個人都玩得盡興、不留遺憾，<br>請務必填寫這份旅遊意願調查表！<br>你的每一票，都決定了我們的快樂指數 😄</div>
+      <button class="btn-start" onclick="goTo(2)">準備好出發囉~ <span class="arrow">👉</span></button>
+    </div>
+  </div>
+
+  <!-- ===== 第二頁 ===== -->
+  <div class="page" id="page2">
+    <div class="step-indicator">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="page-header">
+      <h2>📝 基本資料</h2>
+      <p>姓名、大人人數、交通方式為必填；小孩若沒有可保持 0 人</p>
+    </div>
+    <div class="form-card">
+      <div class="form-group" id="fg-name">
+        <label>👤 你的大名（報名掛名用）</label>
+        <input type="text" id="inp-name" placeholder="請輸入姓名">
+        <span class="err-msg">⚠️ 姓名不能是無名小卒啦，請填寫！</span>
+      </div>
+      <div class="num-row">
+        <div class="form-group" id="fg-adult">
+          <label>🧑 大人幾位</label>
+          <input type="number" id="inp-adult" min="1" placeholder="至少1人">
+          <span class="err-msg">⚠️ 大人至少填 1 人</span>
+        </div>
+        <div class="form-group" id="fg-kid">
+          <label>👶 小孩幾位</label>
+          <input type="number" id="inp-kid" min="0" value="0">
+          <div class="field-hint">沒有小孩保持 0 即可，非必填</div>
+        </div>
+      </div>
+      <div class="form-group" id="fg-transport">
+        <label>🚗 交通方式</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="transport" value="自行開車"> 自行開車（油錢自理，感情無價）</label>
+          <label class="radio-opt"><input type="radio" name="transport" value="需要接送"> 需要接送（麻煩公司安排，感謝感謝）</label>
+        </div>
+        <span class="err-msg">⚠️ 請選擇交通方式</span>
+      </div>
+    </div>
+    <button class="btn-next" onclick="validatePage2()">下一步 →</button>
+  </div>
+
+  <!-- ===== 第三頁 ===== -->
+  <div class="page" id="page3">
+    <div class="step-indicator">
+      <div class="step-dot"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="page-header">
+      <h2>🎯 旅遊喜好調查</h2>
+      <p>每個類別最多可複選 2 項，每項都要填才能送出喔！</p>
+    </div>
+    <div class="form-card">
+
+      <!-- 旅遊環境 -->
+      <div class="category-block" id="cb-env">
+        <div class="category-title">🌍 旅遊環境 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="env">🏔️ 山頂上的清涼仙境</span>
+            <span class="chip" data-group="env">🌊 曬到脫皮的海灘之旅</span>
+            <span class="chip" data-group="env">⛺ 睡到被蟲嚇到的露營趣</span>
+            <span class="chip" data-group="env">♨️ 泡到皺巴巴的溫泉假期</span>
+            <span class="chip" data-group="env">🏙️ 鋼鐵叢林的都市探索</span>
+            <span class="chip" data-group="env">🌾 空氣超好的田野鄉村</span>
+            <span class="chip chip-other" data-group="env" data-other="env">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-env" placeholder="請說說你想去哪？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 住宿方式 -->
+      <div class="category-block" id="cb-stay">
+        <div class="category-title">🛏️ 住宿方式 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="stay">🏨 有早餐吃的高級飯店</span>
+            <span class="chip" data-group="stay">🏡 有溫度的在地民宿</span>
+            <span class="chip" data-group="stay">🌲 森林裡的小木屋秘境</span>
+            <span class="chip" data-group="stay">🏕️ 睡帳篷挑戰野人生活</span>
+            <span class="chip chip-other" data-group="stay" data-other="stay">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-stay" placeholder="你想住在哪種地方？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 飲食偏好 -->
+      <div class="category-block" id="cb-food">
+        <div class="category-title">🍽️ 飲食偏好 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="food">🐷 台灣人最愛的古早台菜</span>
+            <span class="chip" data-group="food">🍷 外婆吃不慣的西餐大餐</span>
+            <span class="chip" data-group="food">🍝 義大利麵吃到媽媽說讚</span>
+            <span class="chip" data-group="food">🔥 烤到香氣四溢的燒烤趴</span>
+            <span class="chip" data-group="food">🍣 日式料理裝作自己在日本</span>
+            <span class="chip" data-group="food">🍳 自己的野炊自己煮（好棒棒）</span>
+            <span class="chip chip-other" data-group="food" data-other="food">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-food" placeholder="你有什麼飲食偏好？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 景點類型 -->
+      <div class="category-block" id="cb-spot">
+        <div class="category-title">🗺️ 景點類型 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="spot">🌅 大自然美景讓人感動流涕</span>
+            <span class="chip" data-group="spot">💦 溯溪冒險挑戰膽量極限</span>
+            <span class="chip" data-group="spot">🤿 浮潛戲水假裝自己是魚</span>
+            <span class="chip" data-group="spot">🏯 文化古蹟順便增長知識</span>
+            <span class="chip" data-group="spot">📸 市區觀光血拼順便打卡</span>
+            <span class="chip" data-group="spot">🌃 燈紅酒綠的夜生活不醉不歸</span>
+            <span class="chip chip-other" data-group="spot" data-other="spot">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-spot" placeholder="你想去什麼景點？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 互動方式 -->
+      <div class="category-block" id="cb-social">
+        <div class="category-title">🎉 互動方式 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="social">🏃 全員出動的瘋狂團康</span>
+            <span class="chip" data-group="social">🗝️ 燒腦解謎的闖關活動</span>
+            <span class="chip" data-group="social">🎲 哲學對決的桌遊大賽</span>
+            <span class="chip" data-group="social">😱 說出秘密的真心話大冒險</span>
+            <span class="chip chip-other" data-group="social" data-other="social">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-social" placeholder="你喜歡什麼互動方式？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 加碼活動 -->
+      <div class="category-block" id="cb-bonus">
+        <div class="category-title">🎁 加碼活動 <span style="font-weight:400;color:#888;font-size:0.78rem">（最多選2）</span></div>
+        <div class="chips-wrap">
+          <div class="chips">
+            <span class="chip" data-group="bonus">🐗 挑戰打山豬的勇者任務</span>
+            <span class="chip" data-group="bonus">🎯 射飛鼠練成神射手</span>
+            <span class="chip" data-group="bonus">👨‍🍳 手作料理成為廚神之路</span>
+            <span class="chip" data-group="bonus">🍹 創意調酒搖出人生滋味</span>
+            <span class="chip" data-group="bonus">🥾 運動健行燃燒體脂肪</span>
+            <span class="chip chip-other" data-group="bonus" data-other="bonus">✏️ 其他</span>
+          </div>
+          <input class="other-input" id="other-bonus" placeholder="你想加碼什麼活動？">
+        </div>
+        <span class="err-msg">⚠️ 請至少選一項，或填寫「其他」內容</span>
+      </div>
+
+      <!-- 開放式意見 -->
+      <div class="form-group" id="fg-opinion">
+        <div class="category-title" style="margin-bottom:0.5rem">💬 開放式意見</div>
+        <textarea class="open-textarea" id="inp-opinion" placeholder="有什麼特別的要求、夢想、或抱怨，都可以說說看～（例如：我不要睡上鋪、我要海景房、我不敢吃海鮮...）"></textarea>
+        <span class="err-msg">⚠️ 開放式意見欄也要填喔，不能默默傷心</span>
+      </div>
+    </div>
+    <button class="btn-submit" onclick="validatePage3()">🎊 完成送出！</button>
+  </div>
+
+  <!-- ===== 感謝頁 ===== -->
+  <div class="page" id="pageTY">
+    <div class="thankyou">
+      <div class="stars">⭐✨🌟</div>
+      <div class="ty-face">🤣</div>
+      <div class="ty-text">感謝您的填寫！！<br>但最後還是要以金主的意見為主唷～<br>哈哈哈哈哈哈哈！！！</div>
+      <div class="stars">🌟✨⭐</div>
+      <div class="ty-sub">開玩笑的啦～您的意見非常重要！<br>我們會認真參考，讓大家都玩得盡興 🏖️🎉<br><br><strong style="color:#fff">期待和大家一起出發！✈️</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var selections={env:[],stay:[],food:[],spot:[],social:[],bonus:[]};
+
+// ===== 換頁 =====
+function goTo(n){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  var id=n==='TY'?'pageTY':'page'+n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ===== 晶片選取 =====
+document.querySelectorAll('.chip').forEach(function(chip){
+  chip.addEventListener('click',function(){
+    var g=this.dataset.group;
+    var isOther=!!this.dataset.other;
+    var oi=document.getElementById('other-'+g);
+    if(this.classList.contains('selected')){
+      this.classList.remove('selected');
+      if(isOther&&oi){oi.classList.remove('show');oi.value=''}
+      var idx=selections[g].indexOf(isOther?'__other__':this.textContent);
+      if(idx>-1)selections[g].splice(idx,1);
+    } else {
+      if(selections[g].length>=2){alert('每項最多複選 2 項喔！');return}
+      this.classList.add('selected');
+      if(isOther&&oi)oi.classList.add('show');
+      selections[g].push(isOther?'__other__':this.textContent);
+    }
+    document.getElementById('cb-'+g).classList.remove('error');
+  });
+});
+
+document.querySelectorAll('.other-input').forEach(function(inp){
+  inp.addEventListener('input',function(){
+    this.classList.remove('error');
+    var g=this.id.replace('other-','');
+    document.getElementById('cb-'+g).classList.remove('error');
+  });
+});
+
+// ===== 第二頁驗證 =====
+function validatePage2(){
+  var ok=true;
+  var fgName=document.getElementById('fg-name');
+  var fgAdult=document.getElementById('fg-adult');
+  var fgTrans=document.getElementById('fg-transport');
+  [fgName,fgAdult,fgTrans].forEach(function(el){el.classList.remove('error')});
+  if(!document.getElementById('inp-name').value.trim()){fgName.classList.add('error');ok=false}
+  var av=document.getElementById('inp-adult').value;
+  if(!av||parseInt(av)<1){fgAdult.classList.add('error');ok=false}
+  if(!document.querySelector('input[name="transport"]:checked')){fgTrans.classList.add('error');ok=false}
+  var kv=document.getElementById('inp-kid').value;
+  if(kv==='')document.getElementById('inp-kid').value='0';
+  if(ok)goTo(3);
+}
+
+// ===== 第三頁驗證 + 送出 =====
+function validatePage3(){
+  var ok=true;
+  ['env','stay','food','spot','social','bonus'].forEach(function(g){
+    var cb=document.getElementById('cb-'+g);
+    cb.classList.remove('error');
+    var sel=selections[g];
+    var hasOther=sel.indexOf('__other__')>-1;
+    var oi=document.getElementById('other-'+g);
+    var otherVal=oi?oi.value.trim():'';
+    if(sel.length===0||(hasOther&&!otherVal)){
+      cb.classList.add('error');
+      if(hasOther&&oi)oi.classList.add('error');
+      ok=false;
+    }
+  });
+  var op=document.getElementById('inp-opinion');
+  var fgOp=document.getElementById('fg-opinion');
+  fgOp.classList.remove('error');op.classList.remove('error');
+  if(!op.value.trim()){fgOp.classList.add('error');op.classList.add('error');ok=false}
+  if(!ok)return;
+
+  // ===== 組合資料送出到 Google Apps Script =====
+  var data={
+    姓名: document.getElementById('inp-name').value.trim(),
+    大人人數: document.getElementById('inp-adult').value,
+    小孩人數: document.getElementById('inp-kid').value||'0',
+    交通方式: document.querySelector('input[name="transport"]:checked').value,
+    旅遊環境: getVal('env'),
+    住宿方式: getVal('stay'),
+    飲食偏好: getVal('food'),
+    景點類型: getVal('spot'),
+    互動方式: getVal('social'),
+    加碼活動: getVal('bonus'),
+    開放式意見: op.value.trim()
+  };
+
+  // ⬇️ 把下面這行的 URL 換成你從 Google Apps Script 取得的網址
+  var SCRIPT_URL='https://script.google.com/macros/s/AKfycby9LISrN8zqcNDOSi-1gb4xglxF-Vwk95unOwpzRK1tdHuQq3jS4WzTvGy1v1wNWLeF/exec';
+
+  fetch(SCRIPT_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(){
+    goTo('TY');
+  }).catch(function(){
+    goTo('TY'); // 即使網路錯誤也跳感謝頁（可視需求改為顯示錯誤訊息）
+  });
+}
+
+function getVal(g){
+  var sel=selections[g];
+  var oi=document.getElementById('other-'+g);
+  return sel.map(function(v){
+    return v==='__other__'?(oi?oi.value.trim():'其他'):v;
+  }).join('、');
+}
+</script>
+</body>
+</html>
